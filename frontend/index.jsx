@@ -3,34 +3,38 @@ import { render } from 'react-dom'
 import { assoc } from 'ramda'
 import { createStore, applyMiddleware, compose } from 'redux'
 import createLogger from 'redux-logger'
-import Main from './Main'
+import Main, { COLOR_CHANGE } from './Main'
+import Spotlight from '../src/Spotlight'
 
-const rootReducer = (state = { count: 0 }, action) => {
+const rootReducer = (state = { color: 'white' }, action) => {
   let { type } = action
   switch (type) {
-    case 'INC': {
-      let { count } = state
-      return assoc('count', count + 1, state)
+    case COLOR_CHANGE: {
+      return assoc('color', action.payload, state)
     }
     default:
       return state
   }
 }
 
+const STATE_SWITCH = 'STATE_SWITCH'
+
+const switchState = (to) => ({
+  type: STATE_SWITCH, payload: to
+})
+
 const myEnhancer = (next) => {
   return (reducer, s) => {
-    let initState = { current: 0, states: s ? { 0: s } : {} }
+    let initState = { current: '0', states: s ? { '0': s } : {} }
 
     const myReducer = (state = initState, action) => {
       if (action.type === 'STATE_SWITCH') {
-        return assoc('current', action.payload, state)
-      } else {
-        // debugger
-        let { current, states } = state
-        let updatedStates = assoc(current, reducer(states[current], action), states)
-        let r = assoc('states', updatedStates, state)
-        return r
+        state = assoc('current', action.payload, state)
       }
+      let { current, states } = state
+      let updatedStates = assoc(current, reducer(states[current], action), states)
+      let r = assoc('states', updatedStates, state)
+      return r
     }
 
     return next(myReducer, initState)
@@ -45,9 +49,22 @@ const store = createStore(
   )
 )
 
+const SpotlightItem = ({ state, children }) => (
+  <div style={{ background: state.color, width: '100%', height: '100%' }} />
+)
+
 let renderMain = () => {
+  let state = store.getState()
+  let { current, states } = state
+
   render(
-    <Main state={store.getState()} dispatch={store.dispatch} />,
+    <div>
+      <Spotlight
+        state={state}
+        onSwitch={compose(store.dispatch, switchState)}
+        Item={SpotlightItem} />
+      <Main state={states[current]} dispatch={store.dispatch} />
+    </div>,
     document.getElementById('root')
   )
 }
