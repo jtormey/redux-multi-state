@@ -49,21 +49,18 @@ const store = createStore(
   )
 )
 
-const SpotlightItem = ({ state, children }) => (
-  <div style={{ background: state.color, width: '100%', height: '100%' }} />
-)
-
 let renderMain = () => {
-  let state = store.getState()
-  let { current, states } = state
+  let { current, states } = store.getState()
+  let dispatch = store.dispatch
 
   render(
     <div>
       <Spotlight
-        state={state}
+        current={current}
+        states={states}
         onSwitch={compose(store.dispatch, switchState)}
-        Item={SpotlightItem} />
-      <Main state={states[current]} dispatch={store.dispatch} />
+        View={({ state }) => (<Main state={state} />)} />
+      <Main state={states[current]} dispatch={dispatch} />
     </div>,
     document.getElementById('root')
   )

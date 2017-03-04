@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 
+const SCALE_FACTOR = 10
+
 const styles = {
   spotlight: {
     position: 'fixed',
@@ -15,13 +17,14 @@ const styles = {
     border: '0px solid',
     borderRadius: 2
   },
-  item: {
+  item: (x, y, factor) => ({
     marginRight: 16,
     marginBottom: 8,
-    width: 80,
-    height: 80
-  },
-  currentItem: {
+    width: x / factor,
+    height: y / factor,
+    overflow: 'hidden'
+  }),
+  selectedItem: {
     marginBottom: 0,
     paddingBottom: 4,
     borderBottom: '4px solid #ddd'
@@ -31,7 +34,7 @@ const styles = {
 class Spotlight extends Component {
   constructor (props) {
     super(props)
-    let { current, states } = props.state
+    let { current, states } = props
 
     this.state = {
       holding: false,
@@ -44,7 +47,7 @@ class Spotlight extends Component {
   }
 
   componentWillReceiveProps (props) {
-    let { current, states } = props.state
+    let { current, states } = props
     this.setState({
       cycle: parseInt(current),
       total: Object.keys(states).length
@@ -66,7 +69,7 @@ class Spotlight extends Component {
     if (key === 'Control') {
       this.setState({ holding: true })
     } else if (key === 'Escape' && this.state.holding) {
-      this.setState({ holding: false, cycle: this.props.state.current })
+      this.setState({ holding: false, cycle: this.props.current })
     } else if (this.state.holding) {
       event.preventDefault()
       this.handleCmdKey(key)
@@ -82,10 +85,10 @@ class Spotlight extends Component {
   }
 
   handleCmdKey (key) {
-    let { state, onSwitch } = this.props
+    let { states, onSwitch } = this.props
     let { cycle, total } = this.state
     if (key === 'n') {
-      onSwitch && onSwitch(Object.keys(state.states).length.toString())
+      onSwitch && onSwitch(Object.keys(states).length.toString())
     } else if (key === ']') {
       this.setState({ cycle: (cycle + 1) % total })
     } else if (key === '[') {
@@ -94,18 +97,26 @@ class Spotlight extends Component {
   }
 
   render () {
-    let { state, Item } = this.props
+    let { states, View } = this.props
     let { holding, cycle } = this.state
-    let { states } = state
+    let { width, height } = window.screen
+
+    let transform = `translate(-50%, -50%) scale(${1 / SCALE_FACTOR}) translate(50%, 50%)`
+    let itemStyles = styles.item(width, height, SCALE_FACTOR)
+    let getSelectedStyles = (k) => k === cycle.toString() ? styles.selectedItem : {}
+
+    const renderItem = (k) => (
+      <div key={k} style={{ ...itemStyles, ...getSelectedStyles(k) }}>
+        <div style={{ width, height, transform, background: 'white', overflow: 'hidden' }}>
+          <View state={states[k]} />
+        </div>
+      </div>
+    )
 
     return !holding ? null : (
       <div style={styles.spotlight}>
         <div style={styles.inner}>
-          {Object.keys(states).map(k =>
-            <div key={k} style={{ ...styles.item, ...(k === cycle.toString() ? styles.currentItem : {}) }}>
-              <Item state={states[k]}>{k}</Item>
-            </div>
-          )}
+          {Object.keys(states).map(renderItem)}
         </div>
       </div>
     )

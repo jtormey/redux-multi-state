@@ -11,6 +11,7 @@ const styles = {
   flexDirection: 'column',
   padding: 16,
   width: 128,
+  background: 'white',
   border: '1px solid #ddd'
 }
 
@@ -27,11 +28,13 @@ class Main extends Component {
     ]
 
     return (
-      <div style={{ ...styles, background: state.color }}>
-        <span>Pick a color:</span>
-        {options.map(({ color, text }) =>
-          <button key={color} style={{ marginTop: 8 }} onClick={changeColorF(color)}>{text}</button>
-        )}
+      <div style={{ width: '100%', height: '100%', background: state.color, padding: 32 }}>
+        <div style={{ ...styles }}>
+          <span>Pick a color:</span>
+          {options.map(({ color, text }) =>
+            <button key={color} style={{ marginTop: 8 }} onClick={changeColorF(color)}>{text}</button>
+          )}
+        </div>
       </div>
     )
   }
