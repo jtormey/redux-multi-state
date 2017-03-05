@@ -29,6 +29,8 @@ class Main extends Component {
 
     return (
       <div style={{ width: '100%', height: '100%', background: state.color, padding: 32 }}>
+        <h1>Hold "Ctrl" to open Spotlight.</h1>
+        <h2>With Spotlight open, press "n" to create a new, blank state. Use "[" and "]" to switch between states.</h2>
         <div style={{ ...styles }}>
           <span>Pick a color:</span>
           {options.map(({ color, text }) =>
