@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1 id="sev">Severin</h1>
+    <script>
+      let sev = document.getElementById('sev')
+      let colors = ['red', 'green', 'blue', 'pink', 'orange', 'purple']
+      setInterval(() => {
+        sev.style = 'color: ' + colors[0]
+        document.body.bgColor = colors[2]
+        colors.push(colors.shift())
+      }, 1000)
+    </script>
+  </body>
+</html>
