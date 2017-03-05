@@ -28,17 +28,16 @@ const store = createStore(
 )
 
 let renderMain = () => {
-  let { current, states } = store.getState()
+  let state = store.getState()
   let dispatch = store.dispatch
 
   render(
     <div>
       <Spotlight
-        current={current}
-        states={states}
+        store={store}
         onSwitch={compose(store.dispatch, switchState)}
         View={({ state }) => (<Main state={state} />)} />
-      <Main state={states[current]} dispatch={dispatch} />
+      <Main state={state} dispatch={dispatch} />
     </div>,
     document.getElementById('root')
   )

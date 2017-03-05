@@ -1,9 +1,13 @@
 import React, { Component } from 'react'
+import { map, join, compose } from 'ramda'
 
 const SCALE_FACTOR = 10
 
+let px = compose(join(' '), map(n => `${n}px`))
+
 const styles = {
   spotlight: {
+    zIndex: 128000,
     position: 'fixed',
     bottom: '50%',
     width: '100%',
@@ -13,7 +17,7 @@ const styles = {
   inner: {
     background: '#46464d',
     display: 'flex',
-    padding: '16 0 8 16',
+    padding: px([16, 0, 8, 16]),
     border: '0px solid',
     borderRadius: 2
   },
@@ -34,12 +38,12 @@ const styles = {
 class Spotlight extends Component {
   constructor (props) {
     super(props)
-    let { current, states } = props
+    let { __current, __states } = props.store.getState()
 
     this.state = {
       holding: false,
-      cycle: parseInt(current),
-      total: Object.keys(states).length
+      cycle: parseInt(__current),
+      total: Object.keys(__states).length
     }
 
     this.keydownHandlerBound = this.keydownHandler.bind(this)
@@ -47,10 +51,10 @@ class Spotlight extends Component {
   }
 
   componentWillReceiveProps (props) {
-    let { current, states } = props
+    let { __current, __states } = props.store.getState()
     this.setState({
-      cycle: parseInt(current),
-      total: Object.keys(states).length
+      cycle: parseInt(__current),
+      total: Object.keys(__states).length
     })
   }
 
@@ -85,10 +89,11 @@ class Spotlight extends Component {
   }
 
   handleCmdKey (key) {
-    let { states, onSwitch } = this.props
+    let { store, onSwitch } = this.props
+    let { __states } = store.getState()
     let { cycle, total } = this.state
     if (key === 'n') {
-      onSwitch && onSwitch(Object.keys(states).length.toString())
+      onSwitch && onSwitch(Object.keys(__states).length.toString())
     } else if (key === ']') {
       this.setState({ cycle: (cycle + 1) % total })
     } else if (key === '[') {
@@ -97,7 +102,7 @@ class Spotlight extends Component {
   }
 
   render () {
-    let { states, View } = this.props
+    let { store, View } = this.props
     let { holding, cycle } = this.state
     let { width, height } = window.screen
 
@@ -108,7 +113,7 @@ class Spotlight extends Component {
     const renderItem = (k) => (
       <div key={k} style={{ ...itemStyles, ...getSelectedStyles(k) }}>
         <div style={{ width, height, transform, background: 'white', overflow: 'hidden' }}>
-          <View state={states[k]} />
+          <View state={store.getState(k)} />
         </div>
       </div>
     )
@@ -116,7 +121,7 @@ class Spotlight extends Component {
     return !holding ? null : (
       <div style={styles.spotlight}>
         <div style={styles.inner}>
-          {Object.keys(states).map(renderItem)}
+          {Object.keys(store.getState().__states).map(renderItem)}
         </div>
       </div>
     )
